@@ -1,6 +1,11 @@
+* {
+    font-family: 'Press Start 2P', sans-serif;
+}
+
 img {
     max-height: 300px;
 }
+
 
 #results {
     display: none;
