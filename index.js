@@ -9,15 +9,40 @@
     const results = document.getElementById('results');
     const resultsImg = document.getElementById('results-img');
     const resultsText = document.getElementById('results-text');
+    const footerText = document.querySelector('footer h5');
     const sadMusic = [
         {
             src: 'Sulking.mp3',
+            attr: null,
+        },
+        {
+            src: 'Suzuki_s_Theme.mp3',
+            attr: null,
+        },
+        {
+            src: 'Wistful_Harp.mp3',
+            attr: null,
+        },
+        {
+            src: 'Solo_Cello_Passion.mp3',
             attr: null,
         }
     ]
     const happyMusic = [
         {
             src: 'Conjuto_Grande.mp3',
+            attr: null,
+        },
+        {
+            src: 'The_Cascades.mp3',
+            attr: null,
+        },
+        {
+            src: 'Hit_the_Switch.mp3',
+            attr: null,
+        },
+        {
+            src: 'Getz_Me_to_Brazil.mp3',
             attr: null,
         }
     ]
@@ -45,24 +70,30 @@
     }
 
     function failureDisplay(reason) {
-        resultsImg.src = 'images/failure.png';
-        const footerText = document.querySelector('footer h5')
+        const textArea = document.createElement('textarea');
+        resultsImg.src = 'images/failure.png'
         let song = randomSong(sadMusic)
         let audio = new Audio('audio/failure/' + song.src);
         if (reason === 'give up') {
             audio.play();
+            audio.loop = true;
             footerText.textContent = song.attr;
-            resultsText.textContent = 'You gave up with ' + parseTime() + ' left...';
+            resultsText.textContent = 'You gave up with ' + parseTime() + ' left. What went wrong?';
         }
         if (reason === 'timeout') {
-            resultsText.textContent = 'Time has ran out...'
+            resultsText.textContent = 'Time has ran out. What went wrong?'
             setTimeout(function() {
                 audio.play();
+                audio.loop = true;
                 footerText.textContent = song.attr;
             }, 3000)
         }
         displayTimer.innerHTML = '';
-        results.style.display = 'block';
+        results.style.order = '-1';
+        results.appendChild(textArea);
+        setTimeout(function() {
+            results.style.display = 'block';
+        },100)
     }
 
     function giveUpBtnInit() {
@@ -91,9 +122,13 @@
             }
             armsUp = !armsUp;
         }, 500);
+        setTimeout(function(){
+            resultsText.textContent = 'You solved it with ' + parseTime() + ' to spare!';
+        }, 510);
         displayTimer.innerHTML = '';
         audio.play();
         footerText.textContent = song.attr;
+        results.style.order = '-1';
         results.style.display = 'block';
     }
 
@@ -107,10 +142,14 @@
 
 
     function countdownInit() {
-        giveUpBtnInit();
-        successBtnInit();
+        setTimer.innerHTML = '';
+        buttonsSet = false
         timer = setInterval(function() {
-            setTimer.innerHTML = '';
+            if (!buttonsSet) {
+                giveUpBtnInit();
+                successBtnInit();
+                buttonsSet = true;
+            }
             time--;
             console.log(time);
             countdownTimer.innerText = parseTime();
@@ -119,7 +158,7 @@
                 clearInterval(timer);
                 failureDisplay('timeout');
             }
-        }, 10)
+        }, 1000)
     }
 
     start.addEventListener('click', timerInit)
