@@ -1,7 +1,8 @@
 (function() {
-    let time, timer;
+    let time = 0, timer, target;
     const setTimer = document.getElementById('set-timer')
     const displayTimer = document.getElementById('display-timer');
+    const targetTime = document.getElementById('target-time');
     const input = document.getElementById('timer-set');
     const start = document.getElementById('timer-start');
     const countdownTimer = document.getElementById('timer');
@@ -47,11 +48,27 @@
         }
     ]
 
-    function parseTime() {
+    function parseTime(time) {
         let minutes = time >= 60 ? Math.floor(time / 60) : '00';
         let seconds = time % 60 < 10 ? '0' + time % 60 : time % 60;
         return minutes + ':' + seconds;
 
+    }
+
+    function generateResultMessage(reason) {
+        let diff = Math.abs(target - time);
+        if (target >= time && reason === 'failure') {
+            return `You gave up <span class = success> ${parseTime(diff)} under</span> your target time.  What happened?`
+        }
+        if (target < time && reason === 'failure') {
+            return `You gave up <span class = failure> ${parseTime(diff)} over</span> your target time.  What happened?`
+        }
+        if (target >= time && reason === 'success') {
+            return `You solved it <span class = success> ${parseTime(diff)} under</span> your target time!`
+        }
+        if (target < time && reason === 'success') {
+            return `You solved it <span class = failure> ${parseTime(diff)} over</span> your target time!`
+        }
     }
 
     function randomSong(arr) {
@@ -60,7 +77,7 @@
     }
 
     function timerInit() {
-        time = input.value * 60;
+        target = input.value * 60;
         countdownInit();
     }
 
@@ -69,25 +86,15 @@
         failureDisplay('give up');
     }
 
-    function failureDisplay(reason) {
+    function failureDisplay() {
         const textArea = document.createElement('textarea');
         resultsImg.src = 'images/failure.png'
         let song = randomSong(sadMusic)
         let audio = new Audio('audio/failure/' + song.src);
-        if (reason === 'give up') {
-            audio.play();
-            audio.loop = true;
-            footerText.textContent = song.attr;
-            resultsText.textContent = 'You gave up with ' + parseTime() + ' left. What went wrong?';
-        }
-        if (reason === 'timeout') {
-            resultsText.textContent = 'Time has ran out. What went wrong?'
-            setTimeout(function() {
-                audio.play();
-                audio.loop = true;
-                footerText.textContent = song.attr;
-            }, 3000)
-        }
+        audio.play();
+        audio.loop = true;
+        footerText.textContent = song.attr;
+        resultsText.innerHTML = generateResultMessage('failure');
         displayTimer.innerHTML = '';
         results.style.order = '-1';
         results.appendChild(textArea);
@@ -123,7 +130,7 @@
             armsUp = !armsUp;
         }, 500);
         setTimeout(function(){
-            resultsText.textContent = 'You solved it with ' + parseTime() + ' to spare!';
+            resultsText.innerHTML = generateResultMessage('success');
         }, 510);
         displayTimer.innerHTML = '';
         audio.play();
@@ -143,6 +150,7 @@
 
     function countdownInit() {
         setTimer.innerHTML = '';
+        targetTime.textContent = 'Target Time: ' + parseTime(target);
         buttonsSet = false
         timer = setInterval(function() {
             if (!buttonsSet) {
@@ -150,15 +158,17 @@
                 successBtnInit();
                 buttonsSet = true;
             }
-            time--;
+            time++;
             console.log(time);
-            countdownTimer.innerText = parseTime();
-            if (time <= 0) {
-                bell.play();
-                clearInterval(timer);
-                failureDisplay('timeout');
+            countdownTimer.textContent = 'Elapsed Time: ' + parseTime(time);
+            if (time >= target) {
+                countdownTimer.style.color = 'red';
             }
-        }, 1000)
+        },1000)
+        setTimeout(function() {
+            displayTimer.style.display = 'block';
+            displayTimer.style.order = -1;
+        },1100)
     }
 
     start.addEventListener('click', timerInit)

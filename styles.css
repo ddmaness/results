@@ -55,6 +55,14 @@ footer h5 {
     font-size: 8px;
 }
 
-#results {
+#display-timer, #results {
     display: none;
+}
+
+.success {
+    color: green;
+}
+
+.failure {
+    color: red;
 }
